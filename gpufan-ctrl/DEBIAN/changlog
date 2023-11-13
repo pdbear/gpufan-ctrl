@@ -1,0 +1,5 @@
+gpufan-ctrl (0.0.1-0) unstable; urgency=medium
+
+  * support gpu fan contorl
+
+ -- dpawsbear <robo_jet@qq.com>  Mon, 01 Nov 2023 10:00:00 +0000

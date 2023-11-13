@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# 这里是注释,请不要修改这部分,脚本没设置错误机制
+# 请按照下面demo进行修改填写，出错了请自行解决。
+#
+# "interval"  : "5",       // 调整一次风扇速度间隔时间为5
+# "hwmon"     : "4",       // 第4组,hwmon4
+# "pwm_chan"  : "1",       // hwmon中第1个通道 hwmon4/pwm1
+# "fan_chan"  : "1",       // 某些主板这里并不是和pwm通道对应的
+# "fan_min"   : "10",      // 风扇启动时候最小转速为10%
+# "fan_max"   : "70",      // 风扇正常调速时最高转速70%
+# "tmp_start" : "45",      // 当显卡温度达到此(45度)温度，风扇启动
+# "tmp_ratio" : "2",       // 当显卡温度每升高1度，风扇转速提高2%
+# "tmp_high"  : "82"       // 当显卡温度达到此(82度)温度，风扇全速运转(100%)
+
+cfg_path="/etc/gpufan-ctrl/config.json"
+
+cfg_interval=$(jq -r '.interval' $cfg_path)
+cfg_hwmon=$(jq -r '.hwmon' $cfg_path)
+cfg_pwm_chan=$(jq -r '.pwm_chan' $cfg_path)
+cfg_fan_chan=$(jq -r '.fan_chan' $cfg_path)
+cfg_fan_min=$(jq -r '.fan_min' $cfg_path)
+cfg_fan_max=$(jq -r '.fan_max' $cfg_path)
+cfg_tmp_start=$(jq -r '.tmp_start' $cfg_path)
+cfg_tmp_ratio=$(jq -r '.tmp_ratio' $cfg_path)
+cfg_tmp_high=$(jq -r '.tmp_high' $cfg_path)
+
+# control path
+ctrl_enable="/sys/class/hwmon/hwmon${cfg_hwmon}/pwm${cfg_pwm_chan}_enable"
+ctrl_path="/sys/class/hwmon/hwmon${cfg_hwmon}/pwm${cfg_pwm_chan}"
+fan_input="/sys/class/hwmon/hwmon${cfg_hwmon}/fan${cfg_fan_chan}_input"
+if [ -e "$ctrl_enable" ]; then
+    echo "1" > $ctrl_enable
+fi
+
+if [ ! -e "$ctrl_path" ]; then
+    echo "pwm control path not found! please make sure driver&config work correct!"
+    exit -1
+fi
+
+if [ ! -e "$fan_input" ]; then
+    echo "fan input path not found! please make sure driver&config work correct!"
+    exit -1
+fi
+
+# fan input
+ctrl_value="0"
+
+# control logical
+echo "| GPU Temp | Fan Speed | Fan RPM |"
+while true; do
+    curr_tmp=$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader)
+    if [ $curr_tmp -le $cfg_tmp_start ]; then
+        ctrl_value="0"
+    elif [ $curr_tmp -gt $cfg_tmp_high ]; then
+        ctrl_value="100"
+    else
+        ctrl_value=$(( (($curr_tmp - $cfg_tmp_start) * $cfg_tmp_ratio) + $cfg_fan_min ))
+    fi
+
+    abs_ctrl_value=$(( (ctrl_value * 2) + (ctrl_value >> 1) ))
+    echo $abs_ctrl_value > $ctrl_path
+    fan_value=$(cat $fan_input)
+
+    printf "| %7.4s° | %8.4s%% | %7.4s |\n" "$curr_tmp" "$ctrl_value" "$fan_value"
+    sleep $cfg_interval
+done
+

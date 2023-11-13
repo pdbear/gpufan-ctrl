@@ -1,0 +1,10 @@
+[Unit]
+Description=gpu fan control
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/gpufan-ctrl > /dev/null
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

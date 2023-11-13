@@ -1,0 +1,6 @@
+#!/bin/sh
+set -e
+if [ "$1" = "configure" ]; then
+    systemctl enable gpufan-ctrl.service
+    systemctl start gpufan-ctrl.service
+fi

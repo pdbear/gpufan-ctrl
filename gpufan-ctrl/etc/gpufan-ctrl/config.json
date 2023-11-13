@@ -1,0 +1,11 @@
+{
+    "interval"  : "5", 
+    "hwmon"     : "4",
+    "pwm_chan"  : "1",
+    "fan_chan"  : "1",
+    "fan_min"   : "10",
+    "fan_max"   : "70",
+    "tmp_start" : "45",
+    "tmp_ratio" : "2",
+    "tmp_high"  : "82"
+}

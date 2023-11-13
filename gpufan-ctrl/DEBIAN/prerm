@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+if [ "$1" = "remove" ]; then
+    systemctl stop gpufan-ctrl.service
+    systemctl disable gpufan-ctrl.service
+    rm -f /etc/systemd/system/gpufan-ctrl.service
+    systemctl daemon-reload
+fi

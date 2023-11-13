@@ -1,0 +1,9 @@
+Package: gpufan-ctrl
+Version: 0.0.1
+Architecture: amd64
+Section: utils
+Priority: optional
+Depends: jq (>= 1.6)
+Maintainer: dpawsbear<robo_jet@qq.com>
+Homepage: https://blog.kkk.rs
+Description: gpu fan control
