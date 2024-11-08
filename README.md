@@ -188,5 +188,3 @@ root@pve:~# gpufan-ctrl
 ```bash
 systemctl start gpufan-ctrl.service
 ```
-
-折腾之路并不会一帆风顺，或许你会遇到这样那样的问题，也或许你有更完美的方案，Q群：573116017 欢迎你到来一起探讨。
